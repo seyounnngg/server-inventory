@@ -1,10 +1,13 @@
 package com.example.serverinventory.view;
 
+import com.example.serverinventory.model.Server;
 import com.example.serverinventory.model.User;
 import com.example.serverinventory.service.ServerCheckService;
 import com.example.serverinventory.service.ServerService;
 import com.example.serverinventory.service.UserService;
 
+import java.io.IOException;
+import java.net.InetAddress;
 import java.util.List;
 import java.util.Scanner;
 
@@ -32,6 +35,10 @@ public class ConsoleView {
                 registerUser();
             } else if (choice == 2) {
                 registerServer();
+            } else if (choice == 3) {
+                listServers();
+            } else if (choice == 4) {
+                recordServerCheck();
             }
         }
     }
@@ -69,9 +76,44 @@ public class ConsoleView {
         System.out.println("서버 등록 완료!");
     }
 
+    private void listServers() {
+        List<Server> servers = serverService.getAllServers();
+        System.out.println("=== 서버 목록 ===");
+        for (Server server : servers) {
+            System.out.println(server.getId() + " - " + server.getHostname()
+                    + " (" + server.getIpAddress() + ", " + server.getType() + ")");
+        }
+    }
+
+    private void recordServerCheck() {
+        listServers();
+
+        System.out.print("점검할 서버 id: ");
+        Long serverId = Long.parseLong(scanner.nextLine());
+
+        Server server = serverService.getServerById(serverId);
+        if (server == null) {
+            System.out.println("존재하지 않는 서버입니다.");
+            return;
+        }
+
+        String status;
+        try {
+            boolean reachable = InetAddress.getByName(server.getIpAddress()).isReachable(2000);
+            status = reachable ? "UP" : "DOWN";
+        } catch (IOException e) {
+            status = "DOWN";
+        }
+
+        serverCheckService.recordCheck(serverId, status);
+        System.out.println("점검 완료! 상태: " + status);
+    }
+
     private void printMenu() {
         System.out.println("1. 팀원 등록");
         System.out.println("2. 서버 등록");
+        System.out.println("3. 서버 목록 조회");
+        System.out.println("4. 서버 점검하기");
         System.out.println("0. 종료");
         System.out.print("선택: ");
     }
