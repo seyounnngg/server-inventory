@@ -1,0 +1,4 @@
+db.url=jdbc:mariadb://localhost:3306/crud_db
+   db.username=
+   db.password=
+   db.driver=org.mariadb.jdbc.Driver
