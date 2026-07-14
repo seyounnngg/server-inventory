@@ -6,6 +6,7 @@ import java.util.List;
 
 
 public interface ServerRepository {
+
     void save(Server server);
 
     List<Server> findAll();

@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class ServerCheckService {
+
     private final ServerCheckRepository repository;
 
     public ServerCheckService(ServerCheckRepository repository) {

@@ -6,6 +6,7 @@ import com.example.serverinventory.repository.UserRepository;
 import java.util.List;
 
 public class UserService {
+
     private final UserRepository repository;
 
     public UserService(UserRepository repository) {

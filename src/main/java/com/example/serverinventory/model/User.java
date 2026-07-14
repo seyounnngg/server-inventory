@@ -1,6 +1,7 @@
 package com.example.serverinventory.model;
 
 public class User {
+
     private Long id;
     private String name;
     private String team;

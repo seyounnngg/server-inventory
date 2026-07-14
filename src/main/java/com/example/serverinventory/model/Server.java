@@ -1,6 +1,7 @@
 package com.example.serverinventory.model;
 
 public class Server {
+
     private Long id;
     private String hostname;
     private String ipAddress;

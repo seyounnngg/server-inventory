@@ -3,6 +3,7 @@ package com.example.serverinventory.model;
 import java.time.LocalDateTime;
 
 public class ServerCheck {
+
     private Long id;
     private Long serverId;
     private LocalDateTime checkedAt;
