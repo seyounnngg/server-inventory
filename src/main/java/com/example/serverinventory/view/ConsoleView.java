@@ -1,6 +1,7 @@
 package com.example.serverinventory.view;
 
 import com.example.serverinventory.model.Server;
+import com.example.serverinventory.model.ServerCheck;
 import com.example.serverinventory.model.User;
 import com.example.serverinventory.service.ServerCheckService;
 import com.example.serverinventory.service.ServerService;
@@ -8,6 +9,7 @@ import com.example.serverinventory.service.UserService;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 
@@ -17,6 +19,8 @@ public class ConsoleView {
     private final UserService userService;
     private final ServerService serverService;
     private final ServerCheckService serverCheckService;
+
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public ConsoleView(UserService userService, ServerService serverService, ServerCheckService serverCheckService) {
         this.userService = userService;
@@ -39,6 +43,8 @@ public class ConsoleView {
                 listServers();
             } else if (choice == 4) {
                 recordServerCheck();
+            } else if (choice == 5) {
+                viewCheckHistory();
             }
         }
     }
@@ -86,9 +92,9 @@ public class ConsoleView {
     }
 
     private void recordServerCheck() {
-        listServers();
 
-        System.out.print("점검할 서버 id: ");
+        listServers();
+        System.out.print("점검할 서버 ID: ");
         Long serverId = Long.parseLong(scanner.nextLine());
 
         Server server = serverService.getServerById(serverId);
@@ -109,11 +115,33 @@ public class ConsoleView {
         System.out.println("점검 완료! 상태: " + status);
     }
 
+    private void viewCheckHistory() {
+
+        listServers();
+        System.out.print("조회할 서버 ID: ");
+        Long serverId = Long.parseLong(scanner.nextLine());
+
+        List<ServerCheck> checkList = serverCheckService.getCheckHistory(serverId);
+        if (checkList == null) {
+            System.out.println("점검 기록이 없습니다.");
+            return;
+        }
+
+        System.out.println("=== 점검 이력 ===");
+        for (ServerCheck check : checkList) {
+            System.out.println(check.getCheckedAt().format(formatter) + " - " + check.getStatus());
+        }
+
+        ServerCheck latest = serverCheckService.getLatestCheck(serverId);
+        System.out.println("최신 상태: " + latest.getStatus());
+    }
+
     private void printMenu() {
         System.out.println("1. 팀원 등록");
         System.out.println("2. 서버 등록");
         System.out.println("3. 서버 목록 조회");
         System.out.println("4. 서버 점검하기");
+        System.out.println("5. 서버 점검 이력 보기");
         System.out.println("0. 종료");
         System.out.print("선택: ");
     }
