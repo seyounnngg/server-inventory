@@ -9,8 +9,8 @@ import com.example.serverinventory.view.ConsoleView;
 public class Main {
     public static void main(String[] args) {
         UserRepository userRepository = new UserFileRepository();
-        ServerRepository serverRepository = new ServerMemoryRepository();
-        ServerCheckRepository serverCheckRepository = new ServerCheckMemoryRepository();
+        ServerRepository serverRepository = new ServerFileRepository();
+        ServerCheckRepository serverCheckRepository = new ServerCheckFileRepository();
 
         UserService userService = new UserService(userRepository);
         ServerService serverService = new ServerService(serverRepository);
