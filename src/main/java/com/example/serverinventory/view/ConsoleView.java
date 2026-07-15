@@ -47,6 +47,8 @@ public class ConsoleView {
                 viewCheckHistory();
             } else if (choice == 6) {
                 deleteUser();
+            } else if (choice == 7) {
+                deleteServer();
             }
         }
     }
@@ -158,6 +160,17 @@ public class ConsoleView {
         System.out.println("삭제 완료!");
     }
 
+    private void deleteServer() {
+
+        listServers();
+
+        System.out.print("삭제할 서버 ID: ");
+        Long id = Long.parseLong(scanner.nextLine());
+
+        serverService.deleteServer(id);
+        System.out.println("삭제 완료!");
+    }
+
     private void printMenu() {
         System.out.println("1. 팀원 등록");
         System.out.println("2. 서버 등록");
@@ -165,6 +178,7 @@ public class ConsoleView {
         System.out.println("4. 서버 점검하기");
         System.out.println("5. 서버 점검 이력 보기");
         System.out.println("6. 팀원 삭제");
+        System.out.println("7. 서버 삭제");
         System.out.println("0. 종료");
         System.out.print("선택: ");
     }
