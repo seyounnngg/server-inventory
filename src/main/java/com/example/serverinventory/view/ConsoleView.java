@@ -49,6 +49,10 @@ public class ConsoleView {
                 deleteUser();
             } else if (choice == 7) {
                 deleteServer();
+            } else if (choice == 8) {
+                updateUser();
+            } else if (choice == 9) {
+                updateServer();
             }
         }
     }
@@ -171,6 +175,48 @@ public class ConsoleView {
         System.out.println("삭제 완료!");
     }
 
+    private void updateUser() {
+
+        listUsers();
+
+        System.out.print("수정할 팀원 ID: ");
+        Long id = Long.parseLong(scanner.nextLine());
+
+        System.out.print("새 이름: ");
+        String name = scanner.nextLine();
+
+        System.out.print("새 팀: ");
+        String team = scanner.nextLine();
+
+        userService.updateUser(id, name, team);
+        System.out.println("수정 완료!");
+    }
+
+    private void updateServer() {
+
+        listServers();
+
+        System.out.print("수정할 서버 ID: ");
+        Long id = Long.parseLong(scanner.nextLine());
+
+        listUsers();
+
+        System.out.print("새 담당자 ID: ");
+        Long ownerId = Long.parseLong(scanner.nextLine());
+
+        System.out.print("새 호스트명: ");
+        String hostname = scanner.nextLine();
+
+        System.out.print("새 IP 주소: ");
+        String ipAddress = scanner.nextLine();
+
+        System.out.print("새 유형 (WEB / DB / APP): ");
+        String type = scanner.nextLine();
+
+        serverService.updateServer(id, hostname, ipAddress, type, ownerId);
+        System.out.println("수정 완료!");
+    }
+
     private void printMenu() {
         System.out.println("1. 팀원 등록");
         System.out.println("2. 서버 등록");
@@ -179,6 +225,8 @@ public class ConsoleView {
         System.out.println("5. 서버 점검 이력 보기");
         System.out.println("6. 팀원 삭제");
         System.out.println("7. 서버 삭제");
+        System.out.println("8. 팀원 수정");
+        System.out.println("9. 서버 수정");
         System.out.println("0. 종료");
         System.out.print("선택: ");
     }
