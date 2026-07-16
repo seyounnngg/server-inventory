@@ -16,7 +16,6 @@ public class Main {
         ServerService serverService = new ServerService(serverRepository);
         ServerCheckService serverCheckService = new ServerCheckService(serverCheckRepository);
 
-
         ConsoleView view = new ConsoleView(userService, serverService, serverCheckService);
         view.start();
     }
