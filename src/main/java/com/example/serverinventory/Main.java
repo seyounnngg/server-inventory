@@ -10,7 +10,7 @@ public class Main {
     public static void main(String[] args) {
         UserRepository userRepository = new UserDbRepository();
         ServerRepository serverRepository = new ServerDbRepository();
-        ServerCheckRepository serverCheckRepository = new ServerCheckFileRepository();
+        ServerCheckRepository serverCheckRepository = new ServerCheckDbRepository();
 
         UserService userService = new UserService(userRepository);
         ServerService serverService = new ServerService(serverRepository);
