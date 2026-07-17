@@ -44,15 +44,17 @@ public class ConsoleView {
             } else if (choice == 4) {
                 recordServerCheck();
             } else if (choice == 5) {
-                viewCheckHistory();
+                checkAllServers();
             } else if (choice == 6) {
-                deleteUser();
+                viewCheckHistory();
             } else if (choice == 7) {
-                deleteServer();
-            } else if (choice == 8) {
                 updateUser();
-            } else if (choice == 9) {
+            } else if (choice == 8) {
                 updateServer();
+            } else if (choice == 9) {
+                deleteUser();
+            } else if (choice == 10) {
+                deleteServer();
             }
         }
     }
@@ -131,6 +133,26 @@ public class ConsoleView {
         System.out.println("점검 완료! 상태: " + status);
     }
 
+    private void checkAllServers() {
+        List<Server> servers = serverService.getAllServers();
+        System.out.println("=== 전체 서버 점검 시작 ===");
+
+        for (Server server : servers) {
+            String status;
+            try {
+                boolean reachable = InetAddress.getByName(server.getIpAddress()).isReachable(2000);
+                status = reachable ? "UP" : "DOWN";
+            } catch (IOException e) {
+                status = "DOWN";
+            }
+
+            serverCheckService.recordCheck(server.getId(), status);
+            System.out.println(server.getHostname() + " - " + status);
+        }
+
+        System.out.println("=== 전체 점검 완료 ===");
+    }
+
     private void viewCheckHistory() {
 
         listServers();
@@ -151,28 +173,9 @@ public class ConsoleView {
 
         ServerCheck latest = serverCheckService.getLatestCheck(serverId);
         System.out.println("최신 상태: " + latest.getStatus());
-    }
 
-    private void deleteUser() {
-
-        listUsers();
-
-        System.out.print("삭제할 팀원 ID: ");
-        Long id = Long.parseLong(scanner.nextLine());
-
-        userService.deleteUser(id);
-        System.out.println("삭제 완료!");
-    }
-
-    private void deleteServer() {
-
-        listServers();
-
-        System.out.print("삭제할 서버 ID: ");
-        Long id = Long.parseLong(scanner.nextLine());
-
-        serverService.deleteServer(id);
-        System.out.println("삭제 완료!");
+        long daysSince = serverCheckService.getDaysSinceLastCheck(serverId);
+        System.out.println("마지막 점검: " + daysSince + "일 전");
     }
 
     private void updateUser() {
@@ -217,16 +220,39 @@ public class ConsoleView {
         System.out.println("수정 완료!");
     }
 
+    private void deleteUser() {
+
+        listUsers();
+
+        System.out.print("삭제할 팀원 ID: ");
+        Long id = Long.parseLong(scanner.nextLine());
+
+        userService.deleteUser(id);
+        System.out.println("삭제 완료!");
+    }
+
+    private void deleteServer() {
+
+        listServers();
+
+        System.out.print("삭제할 서버 ID: ");
+        Long id = Long.parseLong(scanner.nextLine());
+
+        serverService.deleteServer(id);
+        System.out.println("삭제 완료!");
+    }
+
     private void printMenu() {
         System.out.println("1. 팀원 등록");
         System.out.println("2. 서버 등록");
         System.out.println("3. 서버 목록 조회");
         System.out.println("4. 서버 점검하기");
-        System.out.println("5. 서버 점검 이력 보기");
-        System.out.println("6. 팀원 삭제");
-        System.out.println("7. 서버 삭제");
-        System.out.println("8. 팀원 수정");
-        System.out.println("9. 서버 수정");
+        System.out.println("5. 전체 서버 일괄 점검");
+        System.out.println("6. 서버 점검 이력 보기");
+        System.out.println("7. 팀원 수정");
+        System.out.println("8. 서버 수정");
+        System.out.println("9. 팀원 삭제");
+        System.out.println("10. 서버 삭제");
         System.out.println("0. 종료");
         System.out.print("선택: ");
     }

@@ -3,6 +3,7 @@ package com.example.serverinventory.service;
 import com.example.serverinventory.model.ServerCheck;
 import com.example.serverinventory.repository.ServerCheckRepository;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,5 +26,13 @@ public class ServerCheckService {
 
     public ServerCheck getLatestCheck(Long serverId) {
         return repository.findLatestByServerId(serverId);
+    }
+
+    public long getDaysSinceLastCheck(Long serverId) {
+        ServerCheck latest = repository.findLatestByServerId(serverId);
+        if (latest == null) {
+            return -1;
+        }
+        return Duration.between(latest.getCheckedAt(), LocalDateTime.now()).toDays();
     }
 }
