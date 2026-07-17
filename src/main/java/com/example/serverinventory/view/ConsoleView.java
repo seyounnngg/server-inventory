@@ -58,6 +58,8 @@ public class ConsoleView {
                     checkAllServers();
                 } else if (choice == 11) {
                     viewCheckHistory();
+                } else if (choice == 12) {
+                    viewDownServers();
                 } else {
                     System.out.println("존재하지 않는 메뉴입니다.");
                 }
@@ -267,6 +269,30 @@ public class ConsoleView {
         System.out.println("마지막 점검: " + daysSince + "일 전");
     }
 
+    private void viewDownServers() {
+        List<Server> servers = serverService.getAllServers();
+
+        List<Server> downServers = servers.stream()
+                .filter(server -> {
+                    ServerCheck latest = serverCheckService.getLatestCheck(server.getId());
+                    return latest != null && latest.getStatus().equals("DOWN");
+                })
+                .toList();
+
+        if (downServers.isEmpty()) {
+            System.out.println("현재 DOWN 상태인 서버가 없습니다.");
+            return;
+        }
+
+        System.out.println();
+        System.out.println("=== 현재 DOWN 상태인 서버 ===");
+        for (Server server : downServers) {
+            long daysSince = serverCheckService.getDaysSinceLastCheck(server.getId());
+            System.out.println(server.getId() + " - " + server.getHostname()
+                    + " (" + server.getIpAddress() + ") - 마지막 점검: " + daysSince + "일 전");
+        }
+    }
+
     private void listUsers() {
         List<User> users = userService.getAllUsers();
         System.out.println();
@@ -292,7 +318,9 @@ public class ConsoleView {
         System.out.println("9. 서버 점검하기");
         System.out.println("10. 전체 서버 일괄 점검");
         System.out.println("11. 서버 점검 이력 보기");
+        System.out.println("12. DOWN 상태 서버 조회");
         System.out.println("0. 종료");
-        System.out.print("선택: ");
+        System.out.println();
+        System.out.print("메뉴 선택: ");
     }
 }
