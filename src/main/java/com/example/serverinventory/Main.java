@@ -8,7 +8,7 @@ import com.example.serverinventory.view.ConsoleView;
 
 public class Main {
     public static void main(String[] args) {
-        UserRepository userRepository = new UserFileRepository();
+        UserRepository userRepository = new UserDbRepository();
         ServerRepository serverRepository = new ServerFileRepository();
         ServerCheckRepository serverCheckRepository = new ServerCheckFileRepository();
 
