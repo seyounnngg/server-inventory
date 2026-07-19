@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class ConsoleView {
 
@@ -162,11 +164,6 @@ public class ConsoleView {
 
     private void registerServer() {
 
-        listUsers();
-
-        System.out.print("담당자 id: ");
-        Long ownerId = Long.parseLong(scanner.nextLine());
-
         System.out.print("호스트명: ");
         String hostname = scanner.nextLine();
 
@@ -176,49 +173,67 @@ public class ConsoleView {
         System.out.print("유형 (WEB / DB / APP): ");
         String type = scanner.nextLine();
 
-        serverService.registerServer(hostname, ipAddress, type, ownerId);
+        serverService.registerServer(hostname, ipAddress, type, loggedInUser.getId());
         System.out.println("서버 등록 완료!");
+    }
+
+    private Map<Long, User> mapUsersById() {
+        return userService.getAllUsers().stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
     }
 
     private void listServers() {
         List<Server> servers = serverService.getAllServers();
+        Map<Long, User> userMap = mapUsersById();
+
         System.out.println();
         System.out.println("=== 서버 목록 ===");
         for (Server server : servers) {
+            User owner = userMap.get(server.getOwnerId());
+            String ownerName = (owner != null) ? owner.getName() : "알 수 없음";
+
             System.out.println(server.getId() + " - " + server.getHostname()
-                    + " (" + server.getIpAddress() + ", " + server.getType() + ")");
+                    + " (" + server.getIpAddress() + ", " + server.getType() + ") - 담당: " + ownerName);
         }
     }
 
-    private void viewServersByOwner() {
+    private List<Server> listMyServers() {
+        List<Server> myServers = serverService.getServerByOwnerId(loggedInUser.getId());
+
         System.out.println();
-        System.out.println("내 담당 서버: " + loggedInUser.getName());
-        List<Server> servers = serverService.getServerByOwnerId(loggedInUser.getId());
+        System.out.println("=== 내 담당 서버 목록 ===");
+        for (Server server : myServers) {
+            System.out.println(server.getId() + " - " + server.getHostname()
+                    + " (" + server.getIpAddress() + ", " + server.getType() + ")");
+        }
+
+        return myServers;
+    }
+
+    private void viewServersByOwner() {
+        List<Server> servers = listMyServers();
 
         if (servers.isEmpty()) {
             System.out.println("담당하는 서버가 없습니다.");
-            return;
-        }
-
-        System.out.println();
-        System.out.println("=== 담당 서버 목록 ===");
-        for (Server server : servers) {
-            System.out.println(server.getId() + " - " + server.getHostname()
-                    + " (" + server.getIpAddress() + ", " + server.getType() + ")");
         }
     }
 
     private void updateServer() {
 
-        listServers();
+        List<Server> myServers = listMyServers();
+        if (myServers.isEmpty()) {
+            System.out.println("담당하는 서버가 없습니다.");
+            return;
+        }
 
         System.out.print("수정할 서버 ID: ");
         Long id = Long.parseLong(scanner.nextLine());
 
-        listUsers();
-
-        System.out.print("새 담당자 ID: ");
-        Long ownerId = Long.parseLong(scanner.nextLine());
+        Server server = serverService.getServerById(id);
+        if (server == null || !server.getOwnerId().equals(loggedInUser.getId())) {
+            System.out.println("본인이 담당하는 서버만 수정할 수 있습니다.");
+            return;
+        }
 
         System.out.print("새 호스트명: ");
         String hostname = scanner.nextLine();
@@ -229,16 +244,26 @@ public class ConsoleView {
         System.out.print("새 유형 (WEB / DB / APP): ");
         String type = scanner.nextLine();
 
-        serverService.updateServer(id, hostname, ipAddress, type, ownerId);
+        serverService.updateServer(id, hostname, ipAddress, type, loggedInUser.getId());
         System.out.println("수정 완료!");
     }
 
     private void deleteServer() {
 
-        listServers();
+        List<Server> myServers = listMyServers();
+        if (myServers.isEmpty()) {
+            System.out.println("담당하는 서버가 없습니다.");
+            return;
+        }
 
         System.out.print("삭제할 서버 ID: ");
         Long id = Long.parseLong(scanner.nextLine());
+
+        Server server = serverService.getServerById(id);
+        if (server == null || !server.getOwnerId().equals(loggedInUser.getId())) {
+            System.out.println("본인이 담당하는 서버만 삭제할 수 있습니다.");
+            return;
+        }
 
         serverService.deleteServer(id);
         System.out.println("삭제 완료!");
@@ -318,6 +343,7 @@ public class ConsoleView {
 
     private void viewDownServers() {
         List<Server> servers = serverService.getAllServers();
+        Map<Long, User> userMap = mapUsersById();
 
         List<Server> downServers = servers.stream()
                 .filter(server -> {
@@ -335,17 +361,12 @@ public class ConsoleView {
         System.out.println("=== 현재 DOWN 상태인 서버 ===");
         for (Server server : downServers) {
             long daysSince = serverCheckService.getDaysSinceLastCheck(server.getId());
-            System.out.println(server.getId() + " - " + server.getHostname()
-                    + " (" + server.getIpAddress() + ") - 마지막 점검: " + daysSince + "일 전");
-        }
-    }
+            User owner = userMap.get(server.getOwnerId());
+            String ownerName = (owner != null) ? owner.getName() : "알 수 없음";
 
-    private void listUsers() {
-        List<User> users = userService.getAllUsers();
-        System.out.println();
-        System.out.println("=== 등록된 팀원 목록 ===");
-        for (User user : users) {
-            System.out.println(user.getId() + " - " + user.getName() + " (" + user.getTeam() + ")");
+            System.out.println(server.getId() + " - " + server.getHostname()
+                    + " (" + server.getIpAddress() + ") - 담당: " + ownerName
+                    + " - 마지막 점검: " + daysSince + "일 전");
         }
     }
 
@@ -356,7 +377,7 @@ public class ConsoleView {
         System.out.println("2. 회원 탈퇴");
         System.out.println("--- 서버 관리 ---");
         System.out.println("3. 서버 등록");
-        System.out.println("4. 서버 목록 조회");
+        System.out.println("4. 전체 서버 목록 조회");
         System.out.println("5. 내 담당 서버 조회");
         System.out.println("6. 서버 수정");
         System.out.println("7. 서버 삭제");
