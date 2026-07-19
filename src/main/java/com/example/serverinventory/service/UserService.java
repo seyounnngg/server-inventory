@@ -13,9 +13,20 @@ public class UserService {
         this.repository = repository;
     }
 
-    public void registerUser(String name, String team) {
-        User user = new User(name, team);
+    public void registerUser(String name, String team, String username, String password) {
+        User user = new User(name, team, username, password);
         repository.save(user);
+    }
+
+    public User login(String username, String password) {
+        User user = repository.findByUsername(username);
+        if (user == null) {
+            return null;
+        }
+        if (!user.getPassword().equals(password)) {
+            return null;
+        }
+        return user;
     }
 
     public List<User> getAllUsers() {
