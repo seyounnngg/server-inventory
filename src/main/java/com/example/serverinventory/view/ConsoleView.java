@@ -130,8 +130,12 @@ public class ConsoleView {
         System.out.print("비밀번호: ");
         String password = scanner.nextLine();
 
-        userService.registerUser(name, team, username, password);
-        System.out.println("회원가입 완료! 다시 로그인해주세요.");
+        boolean success = userService.registerUser(name, team, username, password);
+        if (success) {
+            System.out.println("회원가입 완료! 다시 로그인해주세요.");
+        } else {
+            System.out.println("이미 사용 중인 아이디입니다.");
+        }
     }
 
     private void updateUser() {

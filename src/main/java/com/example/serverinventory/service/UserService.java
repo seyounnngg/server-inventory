@@ -13,9 +13,14 @@ public class UserService {
         this.repository = repository;
     }
 
-    public void registerUser(String name, String team, String username, String password) {
+    public boolean registerUser(String name, String team, String username, String password) {
+        User existing = repository.findByUsername(username);
+        if (existing != null) {
+            return false;
+        }
         User user = new User(name, team, username, password);
         repository.save(user);
+        return true;
     }
 
     public User login(String username, String password) {
