@@ -19,10 +19,12 @@ public class UserDbRepository implements UserRepository {
 
     @Override
     public void save(User user) {
-        String sql = "INSERT INTO user (name, team) VALUES (?, ?)";
+        String sql = "INSERT INTO user (name, team, username, password) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, user.getName());
             stmt.setString(2, user.getTeam());
+            stmt.setString(3, user.getUsername());
+            stmt.setString(4, user.getPassword());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -41,7 +43,9 @@ public class UserDbRepository implements UserRepository {
                 Long id = rs.getLong("id");
                 String name = rs.getString("name");
                 String team = rs.getString("team");
-                users.add(new User(id, name, team));
+                String username = rs.getString("username");
+                String password = rs.getString("password");
+                users.add(new User(id, name, team, username, password));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -61,7 +65,29 @@ public class UserDbRepository implements UserRepository {
                 if (rs.next()) {
                     String name = rs.getString("name");
                     String team = rs.getString("team");
-                    return new User(id, name, team);
+                    String username = rs.getString("username");
+                    String password = rs.getString("password");
+                    return new User(id, name, team, username, password);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public User findByUsername(String username) {
+        String sql = "SELECT * FROM user WHERE username = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Long id = rs.getLong("id");
+                    String name = rs.getString("name");
+                    String team = rs.getString("team");
+                    String pw = rs.getString("password");
+                    return new User(id, name, team, username, pw);
                 }
             }
         } catch (SQLException e) {
@@ -72,12 +98,14 @@ public class UserDbRepository implements UserRepository {
 
     @Override
     public void update(User user) {
-        String sql = "UPDATE user SET name = ?, team = ? WHERE id = ?";
+        String sql = "UPDATE user SET name = ?, team = ?, username = ?, password = ? WHERE id = ?";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, user.getName());
             stmt.setString(2, user.getTeam());
-            stmt.setLong(3, user.getId());
+            stmt.setString(3, user.getUsername());
+            stmt.setString(4, user.getPassword());
+            stmt.setLong(5, user.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

@@ -33,7 +33,9 @@ public class UserFileRepository implements UserRepository {
                 Long id = Long.parseLong(parts[0]);
                 String name = parts[1];
                 String team = parts[2];
-                loadedUsers.add(new User(id, name, team));
+                String username = parts[3];
+                String password = parts[4];
+                loadedUsers.add(new User(id, name, team, username, password));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -44,7 +46,8 @@ public class UserFileRepository implements UserRepository {
     private void saveToFile() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             for (User user : users) {
-                writer.write(user.getId() + "," + user.getName() + "," + user.getTeam());
+                writer.write(user.getId() + "," + user.getName() + "," + user.getTeam()
+                        + "," + user.getUsername() + "," + user.getPassword());
                 writer.newLine();
             }
         } catch (IOException e) {
@@ -76,6 +79,14 @@ public class UserFileRepository implements UserRepository {
     public User findById(Long id) {
         return users.stream()
                 .filter(user -> user.getId().equals(id))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public User findByUsername(String username) {
+        return users.stream()
+                .filter(user -> user.getUsername().equals(username))
                 .findFirst()
                 .orElse(null);
     }

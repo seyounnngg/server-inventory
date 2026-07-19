@@ -31,6 +31,14 @@ public class UserMemoryRepository implements UserRepository {
     }
 
     @Override
+    public User findByUsername(String username) {
+        return users.stream()
+                .filter(user -> user.getUsername().equals(username))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
     public void update(User user) {
         for (int i = 0; i < users.size(); i++) {
             if (users.get(i).getId().equals(user.getId())) {

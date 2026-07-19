@@ -1,7 +1,9 @@
-CREATE TABLE user(
-    id      BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name    VARCHAR(50) NOT NULL,
-    team    VARCHAR(50)
+CREATE TABLE user (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(50) NOT NULL,
+    team        VARCHAR(50),
+    username     VARCHAR(50) NOT NULL UNIQUE,
+    password    VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE server(
